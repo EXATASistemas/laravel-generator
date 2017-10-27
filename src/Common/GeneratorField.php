@@ -12,6 +12,7 @@ class GeneratorField
     public $htmlInput;
     public $htmlType;
     public $fieldType;
+    public $fieldClass;//Exata:Adicionar classe
 
     /** @var array */
     public $htmlValues;
@@ -29,13 +30,14 @@ class GeneratorField
     public $inIndex = true;
 
     public function parseDBType($dbInput)
-    {
+    {        
         $this->dbInput = $dbInput;
         $this->prepareMigrationText();
     }
 
     public function parseHtmlInput($htmlInput)
     {
+
         $this->htmlInput = $htmlInput;
         $this->htmlValues = [];
 
@@ -55,7 +57,8 @@ class GeneratorField
     }
 
     public function parseOptions($options)
-    {
+    {        
+
         $options = strtolower($options);
         $optionsArr = explode(',', $options);
         if (in_array('s', $optionsArr)) {
@@ -122,6 +125,10 @@ class GeneratorField
         $this->migrationText .= ';';
     }
 
+    /**
+     * Exata
+     * parseFieldFromFile Recurera as informações dos campos atraves do arquivo json     
+     */
     public static function parseFieldFromFile($fieldInput)
     {
         $field = new self();
@@ -134,7 +141,14 @@ class GeneratorField
         $field->isPrimary = isset($fieldInput['primary']) ? $fieldInput['primary'] : false;
         $field->inForm = isset($fieldInput['inForm']) ? $fieldInput['inForm'] : true;
         $field->inIndex = isset($fieldInput['inIndex']) ? $fieldInput['inIndex'] : true;
-
+        /**
+         * Exata
+         * Captura o valor digitado no arquivo json
+         * no campo fieldClass e adiciona na classe o valor digitado.
+         * Quando nenhum parâmetro é enviado , é setado um valor padrão.
+         */
+        $field->fieldClass = isset($fieldInput['fieldClass']) ? $fieldInput['fieldClass'] : 
+        config('infyom.laravel_generator.field_class', 'col-xs col-sm-6 col-md-4 col-lg-3');
         return $field;
     }
 

@@ -4,6 +4,11 @@ namespace InfyOm\Generator\Common;
 
 use Illuminate\Support\Str;
 
+/**
+ * Exata Sistemas
+ * Classe responsável em configurar e pegar todos os parâmetros que serão utilizados 
+ * na geração dos arquivos
+ */
 class GeneratorConfig
 {
     /* Namespace variables */
@@ -325,6 +330,8 @@ class GeneratorConfig
         if ($this->getOption('tableName')) {
             $this->tableName = $this->getOption('tableName');
         } else {
+            //Exata Sistemas: Quando não é setado o nome da tabela é setada aqui
+            //o padrão usando o nome do modelo no plural
             $this->tableName = $this->mSnakePlural;
         }
     }
@@ -334,7 +341,9 @@ class GeneratorConfig
         if ($this->getOption('primary')) {
             $this->primaryName = $this->getOption('primary');
         } else {
-            $this->primaryName = 'id';
+            //Exata Sistemas: Quando não é setado o nome da chave primária é setada aqui
+            //o padrão é id , troquei para sql_rowid para não precisar colocar a toda hora
+            $this->primaryName = 'sql_rowid';
         }
     }
 

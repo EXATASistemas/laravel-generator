@@ -1,10 +1,9 @@
 <?php
 
 namespace $NAMESPACE_DATATABLES$;
-
 use $NAMESPACE_MODEL$\$MODEL_NAME$;
-use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\EloquentDataTable;
+use Yajra\DataTables\Services\DataTable;
 
 class $MODEL_NAME$DataTable extends DataTable
 {
@@ -27,7 +26,7 @@ class $MODEL_NAME$DataTable extends DataTable
      * @param \App\Models\Post $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query($MODEL_NAME$ $model)
+    public function query($MODEL_NAME$$model)
     {
         return $model->newQuery();
     }
@@ -44,9 +43,27 @@ class $MODEL_NAME$DataTable extends DataTable
             ->minifiedAjax()
             ->addAction(['width' => '80px'])
             ->parameters([
-                'dom'     => 'Bfrtip',
-                'order'   => [[0, 'desc']],
-                'buttons' => [
+                'dom'        => 'Bfrtip',
+                'order'      => [[0, 'desc']],
+
+                'responsive' => [
+                    'action' => [
+                        'type'   => 'column',
+                        'target' => -1,
+                    ],
+
+                ],
+                'columnDefs' => [
+                    [
+                        'className' => 'all',
+                        'orderable' => false,
+                        'targets'   => -1,
+                        'data'      => 'action',
+                    ],
+
+                ],
+
+                'buttons'    => [
                     'create',
                     'export',
                     'print',
@@ -63,9 +80,17 @@ class $MODEL_NAME$DataTable extends DataTable
      */
     protected function getColumns()
     {
-        return [
-            $DATATABLE_COLUMNS$
-        ];
+        //Exata Sistemas: Transformo os campos em um array
+        $field = array($DATATABLE_COLUMNS$);
+
+        $campos = [];
+        //Percorro o array e monto outro array com a prorpriedade data e title
+        foreach ($field as $key => $value) {
+            array_push($campos, ['data' => $value, 'title' => trans(strtolower("$MODEL_NAME$") . "." . $value)]);
+        }
+
+        //Retorno os campos formatados
+        return $campos;
     }
 
     /**

@@ -38,7 +38,7 @@ class CommandData
     protected static $instance = null;
 
     public static function getInstance()
-    {
+    {  
         return self::$instance;
     }
 
@@ -52,13 +52,22 @@ class CommandData
     {
         $this->commandObj = $commandObj;
         $this->commandType = $commandType;
-
+        
+        /**
+         * Exata Sistemas
+         * [$this->fieldNamesMapping description]
+         * É mapeado o parâmetro do arquivo stub e 
+         * qual é o seu equivalente no arquivo json do modelo
+         * @var [type]
+         */
         $this->fieldNamesMapping = [
             '$FIELD_NAME_TITLE$' => 'fieldTitle',
             '$FIELD_NAME$'       => 'name',
+            '$FIELD_CLASS$'       => 'fieldClass',
+
         ];
 
-        $this->config = new GeneratorConfig();
+        $this->config = new GeneratorConfig();        
     }
 
     public function commandError($error)
@@ -83,7 +92,7 @@ class CommandData
 
     public function initCommandData()
     {
-        $this->config->init($this);
+        $this->config->init($this);        
     }
 
     public function getOption($option)
@@ -111,6 +120,7 @@ class CommandData
         $this->fields = [];
 
         if ($this->getOption('fieldsFile') or $this->getOption('jsonFromGUI')) {
+            
             $this->getInputFromFileOrJson();
         } elseif ($this->getOption('fromTable')) {
             $this->getInputFromTable();
@@ -196,6 +206,7 @@ class CommandData
         try {
             if ($this->getOption('fieldsFile')) {
                 $fieldsFileValue = $this->getOption('fieldsFile');
+
                 if (file_exists($fieldsFileValue)) {
                     $filePath = $fieldsFileValue;
                 } elseif (file_exists(base_path($fieldsFileValue))) {
@@ -209,18 +220,18 @@ class CommandData
                     $this->commandError('Fields file not found');
                     exit;
                 }
-
                 $fileContents = file_get_contents($filePath);
                 $jsonData = json_decode($fileContents, true);
                 $this->fields = [];
                 foreach ($jsonData as $field) {
+
                     if (isset($field['type']) && $field['relation']) {
                         $this->relations[] = GeneratorFieldRelation::parseRelation($field['relation']);
                     } else {
                         $this->fields[] = GeneratorField::parseFieldFromFile($field);
                         if (isset($field['relation'])) {
                             $this->relations[] = GeneratorFieldRelation::parseRelation($field['relation']);
-                        }
+                        }                        
                     }
                 }
             } else {

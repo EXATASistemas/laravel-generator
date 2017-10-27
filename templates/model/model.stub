@@ -3,17 +3,18 @@
 namespace $NAMESPACE_MODEL$;
 
 use $NAMESPACE_MODEL_EXTEND$ as Model;
+
 $SOFT_DELETE_IMPORT$
 $DOCS$
 class $MODEL_NAME$ extends Model
 {
-$SOFT_DELETE$
+    $SOFT_DELETE$
     public $table = '$TABLE_NAME$';
     $TIMESTAMPS$
-$SOFT_DELETE_DATES$
-$PRIMARY$
+    $SOFT_DELETE_DATES$
+    $PRIMARY$
     public $fillable = [
-        $FIELDS$
+        $FIELDS$,
     ];
 
     /**
@@ -22,7 +23,7 @@ $PRIMARY$
      * @var array
      */
     protected $casts = [
-        $CAST$
+        $CAST$,
     ];
 
     /**
@@ -31,8 +32,13 @@ $PRIMARY$
      * @var array
      */
     public static $rules = [
-        $RULES$
+        $RULES$,
     ];
 
     $RELATIONS$
+
+    /**
+     * Exata Sistemas: Usado para gerar os mutators para inicializar a variavel quando nulo.
+     */
+    $MUTATORS$
 }

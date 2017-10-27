@@ -189,6 +189,8 @@ class ViewGenerator extends BaseGenerator
     {
         $this->htmlFields = [];
 
+
+
         foreach ($this->commandData->fields as $field) {
             if (!$field->inForm) {
                 continue;
@@ -299,24 +301,51 @@ class ViewGenerator extends BaseGenerator
             //                    break;
             //            }
 
-            $fieldTemplate = HTMLFieldGenerator::generateHTML($field, $this->templateType);
+            // Exata:Captura o templete setado no arquivo stub do field
+            $fieldTemplate = HTMLFieldGenerator::generateHTML($field, $this->templateType); 
+            
 
+            //Exata Sistemas: Cópia das variaveis padrões
+            $arrayVarConfig = $this->commandData->dynamicVars;
+
+            /**
+             * Exata Sistemas : Verifico se o arquivo json está definindo qual classe
+             * que o campo atual vai utilizar.Se ele estiver preenchido eu descarto a
+             * classe padrão
+             */
+            if ($field->fieldClass){    
+                //Descarta a linha relacionada ao campo padrão             
+                unset($arrayVarConfig['$FIELD_CLASS$']);
+            }            
+
+            //Exata Sistemas : primeiro parâmetro era $this->commandData->dynamicVars;
+            //foi alterado para $arrayVarConfig
             if (!empty($fieldTemplate)) {
                 $fieldTemplate = fill_template_with_field_data(
-                    $this->commandData->dynamicVars,
+                    $arrayVarConfig ,
                     $this->commandData->fieldNamesMapping,
                     $fieldTemplate,
                     $field
-                );
-                $this->htmlFields[] = $fieldTemplate;
+                );                
+                //Exata:Retorna o campo já preenchido com as propriedades da coluna da tabela
+                //e adiciona no array                
+                $this->htmlFields[] = $fieldTemplate;                
             }
         }
 
+        
+        //Exata: Pega o template stub do arquivo fields.stub
         $templateData = get_template('scaffold.views.fields', $this->templateType);
-        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
 
+        //Exata: substitui as variaveis do stub pelos dados do formuláro
+        //Ex rota e botão 
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);        
+
+        //Exata: Substitui a variavel $FIELDS$ pelos campos capturados
+        //e junta com ação do formulário
         $templateData = str_replace('$FIELDS$', implode("\n\n", $this->htmlFields), $templateData);
-
+        
+        //Cria o arquivo do formulário
         FileUtil::createFile($this->path, 'fields.blade.php', $templateData);
         $this->commandData->commandInfo('field.blade.php created');
     }
@@ -334,9 +363,7 @@ class ViewGenerator extends BaseGenerator
     private function generateUpdate()
     {
         $templateData = get_template('scaffold.views.edit', $this->templateType);
-
         $templateData = fill_template($this->commandData->dynamicVars, $templateData);
-
         FileUtil::createFile($this->path, 'edit.blade.php', $templateData);
         $this->commandData->commandInfo('edit.blade.php created');
     }
@@ -344,13 +371,11 @@ class ViewGenerator extends BaseGenerator
     private function generateShowFields()
     {
         $fieldTemplate = get_template('scaffold.views.show_field', $this->templateType);
-
         $fieldsStr = '';
-
         foreach ($this->commandData->fields as $field) {
             $singleFieldStr = str_replace('$FIELD_NAME_TITLE$', Str::title(str_replace('_', ' ', $field->name)),
                 $fieldTemplate);
-            $singleFieldStr = str_replace('$FIELD_NAME$', $field->name, $singleFieldStr);
+            $singleFieldStr = str_replace('$FIELD_NAME$', $field->name, $singleFieldStr);            
             $singleFieldStr = fill_template($this->commandData->dynamicVars, $singleFieldStr);
 
             $fieldsStr .= $singleFieldStr."\n\n";

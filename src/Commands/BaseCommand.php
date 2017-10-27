@@ -22,6 +22,11 @@ use InfyOm\Generator\Utils\FileUtil;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
+/**
+ * Exata Sistemas: Classe que receberá os parâmetros vindo pela linha de comando e irá iniciar todo o processo
+ * de geração.
+ * Esta classe depende principalmente da classe GeneratorConfig e CommandData
+ */
 class BaseCommand extends Command
 {
     /**
@@ -29,7 +34,7 @@ class BaseCommand extends Command
      *
      * @var CommandData
      */
-    public $commandData;
+    public $commandData; 
 
     /**
      * @var Composer
@@ -181,6 +186,11 @@ class BaseCommand extends Command
                 'primary'     => $field->isPrimary,
                 'inForm'      => $field->inForm,
                 'inIndex'     => $field->inIndex,
+                /**
+                 * Exata Sistemas: Por padrão o arquivo Json será gerado
+                 * com o campo fieldClass 
+                 */
+                'fieldClass' => $field->fieldClass,                
             ];
         }
 
@@ -225,6 +235,10 @@ class BaseCommand extends Command
      */
     public function getOptions()
     {
+        /**
+         * Exata sistemas: Configura o tipo de comando esperado , por exemplo quando adicionado
+         * se precisa passar mais algum argumento
+         */        
         return [
             ['fieldsFile', null, InputOption::VALUE_REQUIRED, 'Fields input as json file'],
             ['jsonFromGUI', null, InputOption::VALUE_REQUIRED, 'Direct Json string while using GUI interface'],

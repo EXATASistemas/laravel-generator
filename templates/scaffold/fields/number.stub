@@ -1,0 +1,6 @@
+<!-- $FIELD_NAME_TITLE$ Field -->
+<!-- Exata Sistemas - Adicionado suporte a tradução e adição de classe no imput -->
+<div class="form-group $FIELD_CLASS$">
+    {!! Form::label('$FIELD_NAME$', trans(strtolower("$MODEL_NAME$").".$FIELD_NAME$").':') !!}
+    {!! Form::number('$FIELD_NAME$', null, ['class' => 'form-control']) !!}
+</div>
