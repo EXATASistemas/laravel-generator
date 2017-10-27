@@ -74,9 +74,13 @@ class GeneratorConfig
         'datatables',
         'views',
         'relations',
+        'module', //exata: nome do módulo.
     ];
 
     public $tableName;
+
+    //exata: nome do módulo.
+    public $module;
 
     /** @var string */
     protected $primaryName;
@@ -96,6 +100,7 @@ class GeneratorConfig
         $this->prepareOptions($commandData);
         $this->prepareModelNames();
         $this->preparePrefixes();
+        $this->prepareTableName();
         $this->loadPaths();
         $this->prepareTableName();
         $this->preparePrimaryName();
@@ -113,27 +118,48 @@ class GeneratorConfig
 
         $this->nsApp = $commandData->commandObj->getLaravel()->getNamespace();
         $this->nsApp = substr($this->nsApp, 0, strlen($this->nsApp) - 1);
-        $this->nsRepository = config('infyom.laravel_generator.namespace.repository', 'App\Repositories').$prefix;
-        $this->nsModel = config('infyom.laravel_generator.namespace.model', 'App\Models').$prefix;
+        
         if (config('infyom.laravel_generator.ignore_model_prefix', false)) {
             $this->nsModel = config('infyom.laravel_generator.namespace.model', 'App\Models');
         }
-        $this->nsDataTables = config('infyom.laravel_generator.namespace.datatables', 'App\DataTables').$prefix;
         $this->nsModelExtend = config(
             'infyom.laravel_generator.model_extend_class',
             'Illuminate\Database\Eloquent\Model'
         );
 
+        if ($this->options['module'] && $this->addOns['modules'] == true) {
+            $this->loadModuleNamespaces();
+            return;
+        }
+      
+        $this->nsModel = config('infyom.laravel_generator.namespace.model', 'App\Models').$prefix;
+        $this->nsDataTables = config('infyom.laravel_generator.namespace.datatables', 'App\DataTables').$prefix;
+        $this->nsRepository = config('infyom.laravel_generator.namespace.repository', 'App\Repositories').$prefix;
+        $this->nsController = config('infyom.laravel_generator.namespace.controller', 'App\Http\Controllers').$prefix;
         $this->nsApiController = config(
             'infyom.laravel_generator.namespace.api_controller',
             'App\Http\Controllers\API'
         ).$prefix;
-        $this->nsApiRequest = config('infyom.laravel_generator.namespace.api_request', 'App\Http\Requests\API').$prefix;
-
-        $this->nsRequest = config('infyom.laravel_generator.namespace.request', 'App\Http\Requests').$prefix;
-        $this->nsRequestBase = config('infyom.laravel_generator.namespace.request', 'App\Http\Requests');
         $this->nsBaseController = config('infyom.laravel_generator.namespace.controller', 'App\Http\Controllers');
-        $this->nsController = config('infyom.laravel_generator.namespace.controller', 'App\Http\Controllers').$prefix;
+        $this->nsRequest = config('infyom.laravel_generator.namespace.request', 'App\Http\Requests').$prefix;
+        $this->nsApiRequest = config('infyom.laravel_generator.namespace.api_request', 'App\Http\Requests\API').$prefix;
+        $this->nsRequestBase = config('infyom.laravel_generator.namespace.request', 'App\Http\Requests');
+    }
+
+    //exata: carrega o prefixo de namespaces pros modulos.
+    public function loadModuleNamespaces()
+    {
+        $moduleNs = config('modules.namespace').'\\'.$this->options['module'].'\\';
+
+        $this->nsModel = $moduleNs.config('infyom.laravel_generator.namespace.model');
+        $this->nsDataTables = $moduleNs.config('infyom.laravel_generator.namespace.datatables');
+        $this->nsRepository = $moduleNs.config('infyom.laravel_generator.namespace.repository');
+        $this->nsController = $moduleNs.config('infyom.laravel_generator.namespace.controller');
+        $this->nsApiController = $moduleNs.config('infyom.laravel_generator.namespace.api_controller');
+        $this->nsBaseController = config('infyom.laravel_generator.namespace.controller', 'App\Http\Controllers');
+        $this->nsRequest = $moduleNs.config('infyom.laravel_generator.namespace.request');
+        $this->nsApiRequest = $moduleNs.config('infyom.laravel_generator.namespace.api_request');
+        $this->nsRequestBase = $moduleNs.config('infyom.laravel_generator.namespace.request');
     }
 
     public function loadPaths()
@@ -156,6 +182,7 @@ class GeneratorConfig
         ).$prefix;
 
         $this->pathModel = config('infyom.laravel_generator.path.model', app_path('Models/')).$prefix;
+
         if (config('infyom.laravel_generator.ignore_model_prefix', false)) {
             $this->pathModel = config('infyom.laravel_generator.path.model', app_path('Models/'));
         }
@@ -193,9 +220,33 @@ class GeneratorConfig
         ).$viewPrefix.$this->mSnakePlural.'/';
 
         $this->modelJsPath = config(
-                'infyom.laravel_generator.path.modelsJs',
-                base_path('resources/assets/js/models/')
+            'infyom.laravel_generator.path.modelsJs',
+            base_path('resources/assets/js/models/')
         );
+
+        if ($this->options['module'] && $this->addOns['modules'] == true) {
+            $this->loadModulePaths();
+        }
+    }
+
+    //exata: carrega o prefixo de paths pros modulos.
+    public function loadModulePaths()
+    {
+        $modulePath = config('modules.paths.modules').'/'.$this->options['module'];
+
+        $this->pathRepository = str_replace(base_path(), $modulePath, $this->pathRepository);
+        $this->pathModel = str_replace(base_path(), $modulePath, $this->pathModel);
+        $this->pathDataTables = str_replace(base_path(), $modulePath, $this->pathDataTables);
+        $this->pathApiController = str_replace(base_path(), $modulePath, $this->pathApiController);
+        $this->pathApiRequest = str_replace(base_path(), $modulePath, $this->pathApiRequest);
+        $this->pathApiRoutes = str_replace(base_path(), $modulePath, $this->pathApiRoutes);
+        $this->pathApiTests = str_replace(base_path(), $modulePath, $this->pathApiTests);
+        $this->pathApiTestTraits = str_replace(base_path(), $modulePath, $this->pathApiTestTraits);
+        $this->pathController = str_replace(base_path(), $modulePath, $this->pathController);
+        $this->pathRequest = str_replace(base_path(), $modulePath, $this->pathRequest);
+        $this->pathRoutes = str_replace(base_path(), $modulePath, $this->pathRoutes);
+        $this->pathViews = str_replace(base_path(), $modulePath, $this->pathViews);
+        $this->modelJsPath = str_replace(base_path(), $modulePath, $this->modelJsPath);
     }
 
     public function loadDynamicVariables(CommandData &$commandData)
@@ -302,6 +353,9 @@ class GeneratorConfig
         $this->mHumanPlural = title_case(str_replace('_', ' ', Str::snake($this->mSnakePlural)));
     }
 
+    /*
+    * Valida e prepara as opções enviadas na linha de comando.
+    */
     public function prepareOptions(CommandData &$commandData)
     {
         foreach (self::$availableOptions as $option) {
@@ -327,7 +381,16 @@ class GeneratorConfig
                 $this->addOns['datatables'] = false;
             }
         }
+
+        //exata: valida se add do modulos esta ativo.
+        if (!empty($this->options['module'])) {
+            if ($this->addOns['modules'] == false) {
+                $commandData->commandError('Modules add-on not active.');
+                exit;
+            }
+        }
     }
+
 
     public function preparePrefixes()
     {
@@ -421,7 +484,8 @@ class GeneratorConfig
             }
         }
 
-        $addOns = ['swagger', 'tests', 'datatables'];
+        //exata: adicionado addon modules
+        $addOns = ['swagger', 'tests', 'datatables', 'modules'];
 
         foreach ($addOns as $addOn) {
             if (isset($jsonData['addOns'][$addOn])) {
@@ -458,6 +522,10 @@ class GeneratorConfig
         $this->addOns['swagger'] = config('infyom.laravel_generator.add_on.swagger', false);
         $this->addOns['tests'] = config('infyom.laravel_generator.add_on.tests', false);
         $this->addOns['datatables'] = config('infyom.laravel_generator.add_on.datatables', false);
+
+        //exata: verifica se o add modules esta ativo.
+        $this->addOns['modules'] = config('infyom.laravel_generator.add_on.modules', false);
+
         $this->addOns['menu.enabled'] = config('infyom.laravel_generator.add_on.menu.enabled', false);
         $this->addOns['menu.menu_file'] = config('infyom.laravel_generator.add_on.menu.menu_file', 'layouts.menu');
     }

@@ -238,6 +238,8 @@ class BaseCommand extends Command
             ['datatables', null, InputOption::VALUE_REQUIRED, 'Override datatables settings'],
             ['views', null, InputOption::VALUE_REQUIRED, 'Specify only the views you want generated: index,create,edit,show'],
             ['relations', null, InputOption::VALUE_NONE, 'Specify if you want to pass relationships for fields'],
+            //exata: adicionado o parametro --module no artisan
+            ['module', null, InputOption::VALUE_REQUIRED, 'Module Name'],
         ];
     }
 
