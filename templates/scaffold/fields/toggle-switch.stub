@@ -1,8 +1,0 @@
-<!-- 'bootstrap / Toggle Switch $FIELD_NAME_TITLE$ Field' -->
-<!-- Exata Sistemas - Adicionado suporte a tradução e adição de classe no imput -->
-<div class="form-group $FIELD_CLASS$">
-    {!! Form::label('$FIELD_NAME$', trans(strtolower("$MODEL_NAME$").".$FIELD_NAME$").':') !!}
-    <label class="checkbox-inline">
-   {!! Form::checkbox('$FIELD_NAME$', 1, true,  ['data-toggle' => 'toggle']) !!}
-    </label>
-</div>

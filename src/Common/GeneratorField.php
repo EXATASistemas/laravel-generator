@@ -12,7 +12,7 @@ class GeneratorField
     public $htmlInput;
     public $htmlType;
     public $fieldType;
-    public $fieldClass;//Exata:Adicionar classe
+    public $fieldClass; //Exata:Adicionar classe
 
     /** @var array */
     public $htmlValues;
@@ -24,13 +24,13 @@ class GeneratorField
 
     /** @var bool */
     public $isSearchable = true;
-    public $isFillable = true;
-    public $isPrimary = false;
-    public $inForm = true;
-    public $inIndex = true;
+    public $isFillable   = true;
+    public $isPrimary    = false;
+    public $inForm       = true;
+    public $inIndex      = true;
 
     public function parseDBType($dbInput)
-    {        
+    {
         $this->dbInput = $dbInput;
         $this->prepareMigrationText();
     }
@@ -38,7 +38,7 @@ class GeneratorField
     public function parseHtmlInput($htmlInput)
     {
 
-        $this->htmlInput = $htmlInput;
+        $this->htmlInput  = $htmlInput;
         $this->htmlValues = [];
 
         if (empty($htmlInput)) {
@@ -57,20 +57,20 @@ class GeneratorField
     }
 
     public function parseOptions($options)
-    {        
+    {
 
-        $options = strtolower($options);
+        $options    = strtolower($options);
         $optionsArr = explode(',', $options);
         if (in_array('s', $optionsArr)) {
             $this->isSearchable = false;
         }
         if (in_array('p', $optionsArr)) {
             // if field is primary key, then its not searchable, fillable, not in index & form
-            $this->isPrimary = true;
+            $this->isPrimary    = true;
             $this->isSearchable = false;
-            $this->isFillable = false;
-            $this->inForm = false;
-            $this->inIndex = false;
+            $this->isFillable   = false;
+            $this->inForm       = false;
+            $this->inIndex      = false;
         }
         if (in_array('f', $optionsArr)) {
             $this->isFillable = false;
@@ -85,37 +85,37 @@ class GeneratorField
 
     private function prepareMigrationText()
     {
-        $inputsArr = explode(':', $this->dbInput);
+        $inputsArr           = explode(':', $this->dbInput);
         $this->migrationText = '$table->';
 
         $fieldTypeParams = explode(',', array_shift($inputsArr));
         $this->fieldType = array_shift($fieldTypeParams);
-        $this->migrationText .= $this->fieldType."('".$this->name."'";
+        $this->migrationText .= $this->fieldType . "('" . $this->name . "'";
 
         if ($this->fieldType == 'enum') {
             $this->migrationText .= ', [';
             foreach ($fieldTypeParams as $param) {
-                $this->migrationText .= "'".$param."',";
+                $this->migrationText .= "'" . $param . "',";
             }
             $this->migrationText = substr($this->migrationText, 0, strlen($this->migrationText) - 1);
             $this->migrationText .= ']';
         } else {
             foreach ($fieldTypeParams as $param) {
-                $this->migrationText .= ', '.$param;
+                $this->migrationText .= ', ' . $param;
             }
         }
 
         $this->migrationText .= ')';
 
         foreach ($inputsArr as $input) {
-            $inputParams = explode(',', $input);
+            $inputParams  = explode(',', $input);
             $functionName = array_shift($inputParams);
             if ($functionName == 'foreign') {
                 $foreignTable = array_shift($inputParams);
                 $foreignField = array_shift($inputParams);
-                $this->foreignKeyText .= "\$table->foreign('".$this->name."')->references('".$foreignField."')->on('".$foreignTable."');";
+                $this->foreignKeyText .= "\$table->foreign('" . $this->name . "')->references('" . $foreignField . "')->on('" . $foreignTable . "');";
             } else {
-                $this->migrationText .= '->'.$functionName;
+                $this->migrationText .= '->' . $functionName;
                 $this->migrationText .= '(';
                 $this->migrationText .= implode(', ', $inputParams);
                 $this->migrationText .= ')';
@@ -127,28 +127,28 @@ class GeneratorField
 
     /**
      * Exata
-     * parseFieldFromFile Recurera as informações dos campos atraves do arquivo json     
+     * parseFieldFromFile Recurera as informações dos campos atraves do arquivo json
      */
     public static function parseFieldFromFile($fieldInput)
     {
-        $field = new self();
+        $field       = new self();
         $field->name = $fieldInput['name'];
         $field->parseDBType($fieldInput['dbType']);
         $field->parseHtmlInput(isset($fieldInput['htmlType']) ? $fieldInput['htmlType'] : '');
-        $field->validations = isset($fieldInput['validations']) ? $fieldInput['validations'] : '';
+        $field->validations  = isset($fieldInput['validations']) ? $fieldInput['validations'] : '';
         $field->isSearchable = isset($fieldInput['searchable']) ? $fieldInput['searchable'] : false;
-        $field->isFillable = isset($fieldInput['fillable']) ? $fieldInput['fillable'] : true;
-        $field->isPrimary = isset($fieldInput['primary']) ? $fieldInput['primary'] : false;
-        $field->inForm = isset($fieldInput['inForm']) ? $fieldInput['inForm'] : true;
-        $field->inIndex = isset($fieldInput['inIndex']) ? $fieldInput['inIndex'] : true;
+        $field->isFillable   = isset($fieldInput['fillable']) ? $fieldInput['fillable'] : true;
+        $field->isPrimary    = isset($fieldInput['primary']) ? $fieldInput['primary'] : false;
+        $field->inForm       = isset($fieldInput['inForm']) ? $fieldInput['inForm'] : true;
+        $field->inIndex      = isset($fieldInput['inIndex']) ? $fieldInput['inIndex'] : true;
         /**
          * Exata
          * Captura o valor digitado no arquivo json
          * no campo fieldClass e adiciona na classe o valor digitado.
          * Quando nenhum parâmetro é enviado , é setado um valor padrão.
          */
-        $field->fieldClass = isset($fieldInput['fieldClass']) ? $fieldInput['fieldClass'] : 
-        config('infyom.laravel_generator.field_class', 'col-xs col-sm-6 col-md-4 col-lg-3');
+        $field->fieldClass = isset($fieldInput['fieldClass']) ? $fieldInput['fieldClass'] :
+        config('infyom.laravel_generator.field_class', 'col-md-12');
         return $field;
     }
 

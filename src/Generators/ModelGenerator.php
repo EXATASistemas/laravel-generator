@@ -1,385 +1,309 @@
 <?php
 
-namespace InfyOm\Generator\Generators;
+namespace InfyOm\Generator\Generators\Scaffold;
 
+use Illuminate\Support\Str;
 use InfyOm\Generator\Common\CommandData;
-use InfyOm\Generator\Common\GeneratorFieldRelation;
+use InfyOm\Generator\Generators\BaseGenerator;
 use InfyOm\Generator\Utils\FileUtil;
-use InfyOm\Generator\Utils\TableFieldsGenerator;
+use InfyOm\Generator\Utils\HTMLFieldGenerator;
 
-class ModelGenerator extends BaseGenerator
+class ViewGenerator extends BaseGenerator
 {
-    /**
-     * Fields not included in the generator by default.
-     *
-     * @var array
-     */
-    protected $excluded_fields = [
-        'created_at',
-        'updated_at',
-    ];
-
     /** @var CommandData */
     private $commandData;
 
     /** @var string */
     private $path;
-    private $fileName;
-    private $table;
 
-    /**
-     * ModelGenerator constructor.
-     *
-     * @param \InfyOm\Generator\Common\CommandData $commandData
-     */
+    /** @var string */
+    private $templateType;
+
+    /** @var array */
+    private $htmlFields;
+
     public function __construct(CommandData $commandData)
     {
-        $this->commandData = $commandData;
-        $this->path        = $commandData->config->pathModel;
-        $this->fileName    = $this->commandData->modelName . '.php';
-        $this->table       = $this->commandData->dynamicVars['$TABLE_NAME$'];
+        $this->commandData  = $commandData;
+        $this->path         = $commandData->config->pathViews;
+        $this->templateType = config('infyom.laravel_generator.templates', 'core-templates');
     }
 
     public function generate()
     {
-        $templateData = get_template('model.model', 'laravel-generator');
+        if (!file_exists($this->path)) {
+            mkdir($this->path, 0755, true);
+        }
 
-        $templateData = $this->fillTemplate($templateData);
+        $this->commandData->commandComment("\nGenerating Views...");
 
-        FileUtil::createFile($this->path, $this->fileName, $templateData);
+        if ($this->commandData->getOption('views')) {
+            $viewsToBeGenerated = explode(',', $this->commandData->getOption('views'));
 
-        $this->commandData->commandComment("\nModel created: ");
-        $this->commandData->commandInfo($this->fileName);
+            if (in_array('index', $viewsToBeGenerated)) {
+                $this->generateTable();
+                $this->generateIndex();
+            }
+
+            if (count(array_intersect(['create', 'update'], $viewsToBeGenerated)) > 0) {
+                $this->generateFields();
+            }
+
+            if (in_array('create', $viewsToBeGenerated)) {
+                $this->generateCreate();
+            }
+
+            if (in_array('edit', $viewsToBeGenerated)) {
+                $this->generateUpdate();
+            }
+
+            if (in_array('show', $viewsToBeGenerated)) {
+                $this->generateShowFields();
+                $this->generateShow();
+            }
+        } else {
+            $this->generateTable();
+            $this->generateIndex();
+            $this->generateFields();
+            $this->generateCreate();
+            $this->generateUpdate();
+            $this->generateShowFields();
+            $this->generateShow();
+        }
+
+        $this->commandData->commandComment('Views created: ');
     }
 
-    private function fillTemplate($templateData)
+    private function generateTable()
     {
+        if ($this->commandData->getAddOn('datatables')) {
+            $templateData = $this->generateDataTableBody();
+            $this->generateDataTableActions();
+        } else {
+            $templateData = $this->generateBladeTableBody();
+        }
+
+        FileUtil::createFile($this->path, 'table.blade.php', $templateData);
+
+        $this->commandData->commandInfo('table.blade.php created');
+    }
+
+    private function generateDataTableBody()
+    {
+        $templateData = get_template('scaffold.views.datatable_body', $this->templateType);
+
+        return fill_template($this->commandData->dynamicVars, $templateData);
+    }
+
+    private function generateDataTableActions()
+    {
+        $templateData = get_template('scaffold.views.datatables_actions', $this->templateType);
+
         $templateData = fill_template($this->commandData->dynamicVars, $templateData);
 
-        $templateData = $this->fillSoftDeletes($templateData);
+        FileUtil::createFile($this->path, 'datatables_actions.blade.php', $templateData);
 
-        $fillables = [];
+        $this->commandData->commandInfo('datatables_actions.blade.php created');
+    }
+
+    private function generateBladeTableBody()
+    {
+        $templateData = get_template('scaffold.views.blade_table_body', $this->templateType);
+
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
+
+        $templateData = str_replace('$FIELD_HEADERS$', $this->generateTableHeaderFields(), $templateData);
+
+        $cellFieldTemplate = get_template('scaffold.views.table_cell', $this->templateType);
+
+        $tableBodyFields = [];
 
         foreach ($this->commandData->fields as $field) {
-            if ($field->isFillable) {
-                $fillables[] = "'" . $field->name . "'";
-            }
-        }
-
-        $templateData = $this->fillDocs($templateData);
-
-        $templateData = $this->fillTimestamps($templateData);
-
-        if ($this->commandData->getOption('primary')) {
-            $primary = infy_tab() . "protected \$primaryKey = '" . $this->commandData->getOption('primary') . "';\n";
-        } else {
-            $primary = '';
-        }
-
-        $templateData = str_replace('$PRIMARY$', $primary, $templateData);
-
-        $templateData = str_replace('$FIELDS$', implode(',' . infy_nl_tab(1, 2), $fillables), $templateData);
-
-        $templateData = str_replace('$RULES$', implode(',' . infy_nl_tab(1, 2), $this->generateRules()), $templateData);
-
-        $templateData = str_replace('$CAST$', implode(',' . infy_nl_tab(1, 2), $this->generateCasts()), $templateData);
-
-        $templateData = str_replace(
-            '$RELATIONS$',
-            fill_template($this->commandData->dynamicVars, implode(PHP_EOL . infy_nl_tab(1, 1), $this->generateRelations())),
-            $templateData
-        );
-
-        $templateData = str_replace('$GENERATE_DATE$', date('F j, Y, g:i a T'), $templateData);
-
-        /**
-         * Exata Sistemas: Gera os MUTATORS no modelo selecionado para inicializar os valores nulos
-         */
-        if (stripos($templateData, '$MUTATORS$') !== false) {
-            $templateData = str_replace('$MUTATORS$', implode(' ' . infy_nl_tab(1, 2), $this->generateMutators()), $templateData);
-        }
-        return $templateData;
-    }
-
-    /**
-     * Exata Sistemas
-     * [generateMutators description]
-     * Retorna array com os mutators preenchidos
-     * @return [type] [description]
-     */
-    public function generateMutators()
-    {
-        $mutators = [];
-        foreach ($this->commandData->fields as $field) {
-            $rule = 'public function set' . ucwords(camel_case(trim($field->name))) . 'Attribute($value)
-    {
-        if ($value == null) {
-            $value = ';
-
-            switch ($field->fieldType) {
-                case 'integer':
-                    $rule .= "0";
-                    break;
-                case 'double':
-                    $rule .= "0";
-                    break;
-                case 'float':
-                    $rule .= "0";
-                    break;
-                case 'boolean':
-                    $rule .= "'F'";
-                    break;
-                case 'dateTime':
-                case 'dateTimeTz':
-                    $rule .= "'0001-01-01 00:00:00'";
-                    break;
-                case 'date':
-                    $rule .= "'0001-01-01'";
-                    break;
-                case 'time':
-                    $rule .= "'00:00:00'";
-                    break;
-                case 'enum':
-                case 'string':
-                case 'char':
-                case 'text':
-                    $rule .= "''";
-                    break;
-                default:
-                    $rule = "''";
-                    break;
-            }
-            if (!empty($rule)) {
-                if ($field->name == 'sql_deleted') {
-                    $rule = str_replace("''", "'F'", $rule);
-                }
-                $rule .=
-                    ";}
-            }";
-                $mutators[] = $rule;
-            }
-        }
-        return $mutators;
-    }
-
-    private function fillSoftDeletes($templateData)
-    {
-        if (!$this->commandData->getOption('softDelete')) {
-            $templateData = str_replace('$SOFT_DELETE_IMPORT$', '', $templateData);
-            $templateData = str_replace('$SOFT_DELETE$', '', $templateData);
-            $templateData = str_replace('$SOFT_DELETE_DATES$', '', $templateData);
-        } else {
-            $templateData = str_replace(
-                '$SOFT_DELETE_IMPORT$', "use Illuminate\\Database\\Eloquent\\SoftDeletes;\n",
-                $templateData
-            );
-            $templateData       = str_replace('$SOFT_DELETE$', infy_tab() . "use SoftDeletes;\n", $templateData);
-            $deletedAtTimestamp = config('infyom.laravel_generator.timestamps.deleted_at', 'deleted_at');
-            $templateData       = str_replace(
-                '$SOFT_DELETE_DATES$', infy_nl_tab() . "protected \$dates = ['" . $deletedAtTimestamp . "'];\n",
-                $templateData
-            );
-        }
-
-        return $templateData;
-    }
-
-    private function fillDocs($templateData)
-    {
-        if ($this->commandData->getAddOn('swagger')) {
-            $templateData = $this->generateSwagger($templateData);
-        } else {
-            $docsTemplate = get_template('docs.model', 'laravel-generator');
-            $docsTemplate = fill_template($this->commandData->dynamicVars, $docsTemplate);
-
-            $fillables = '';
-            foreach ($this->commandData->relations as $relation) {
-                $fillables .= ' * @property ' . $this->getPHPDocType($relation->type, $relation) . PHP_EOL;
-            }
-            foreach ($this->commandData->fields as $field) {
-                if ($field->isFillable) {
-                    $fillables .= ' * @property ' . $this->getPHPDocType($field->fieldType) . ' ' . $field->name . PHP_EOL;
-                }
-            }
-            $docsTemplate = str_replace('$GENERATE_DATE$', date('F j, Y, g:i a T'), $docsTemplate);
-            $docsTemplate = str_replace('$PHPDOC$', $fillables, $docsTemplate);
-
-            $templateData = str_replace('$DOCS$', $docsTemplate, $templateData);
-        }
-
-        return $templateData;
-    }
-
-    /**
-     * @param $db_type
-     * @param GeneratorFieldRelation|null $relation
-     *
-     * @return string
-     */
-    private function getPHPDocType($db_type, $relation = null)
-    {
-        switch ($db_type) {
-            case 'datetime':
-                return 'string|\Carbon\Carbon';
-            case 'text':
-                return 'string';
-            case '1t1':
-            case 'mt1':
-                return '\\' . $this->commandData->config->nsModel . '\\' . $relation->inputs[0] . ' ' . camel_case($relation->inputs[0]);
-            case '1tm':
-                return '\Illuminate\Database\Eloquent\Collection' . ' ' . $relation->inputs[0];
-            case 'mtm':
-            case 'hmt':
-                return '\Illuminate\Database\Eloquent\Collection' . ' ' . camel_case($relation->inputs[1]);
-            default:
-                return $db_type;
-        }
-    }
-
-    public function generateSwagger($templateData)
-    {
-        $fieldTypes = SwaggerGenerator::generateTypes($this->commandData->fields);
-
-        $template = get_template('model.model', 'swagger-generator');
-
-        $template = fill_template($this->commandData->dynamicVars, $template);
-
-        $template = str_replace('$REQUIRED_FIELDS$',
-            '"' . implode('"' . ', ' . '"', $this->generateRequiredFields()) . '"', $template);
-
-        $propertyTemplate = get_template('model.property', 'swagger-generator');
-
-        $properties = SwaggerGenerator::preparePropertyFields($propertyTemplate, $fieldTypes);
-
-        $template = str_replace('$PROPERTIES$', implode(",\n", $properties), $template);
-
-        $templateData = str_replace('$DOCS$', $template, $templateData);
-
-        return $templateData;
-    }
-
-    private function generateRequiredFields()
-    {
-        $requiredFields = [];
-
-        foreach ($this->commandData->fields as $field) {
-            if (!empty($field->validations)) {
-                if (str_contains($field->validations, 'required')) {
-                    $requiredFields[] = $field->name;
-                }
-            }
-        }
-
-        return $requiredFields;
-    }
-
-    private function fillTimestamps($templateData)
-    {
-        $timestamps = TableFieldsGenerator::getTimestampFieldNames();
-
-        $replace = '';
-
-        if ($this->commandData->getOption('fromTable')) {
-            if (empty($timestamps)) {
-                $replace = infy_nl_tab() . "public \$timestamps = false;\n";
-            } else {
-                list($created_at, $updated_at) = collect($timestamps)->map(function ($field) {
-                    return !empty($field) ? "'$field'" : 'null';
-                });
-
-                $replace .= infy_nl_tab() . "const CREATED_AT = $created_at;";
-                $replace .= infy_nl_tab() . "const UPDATED_AT = $updated_at;\n";
-            }
-        }
-
-        return str_replace('$TIMESTAMPS$', $replace, $templateData);
-    }
-
-    private function generateRules()
-    {
-        $rules = [];
-
-        foreach ($this->commandData->fields as $field) {
-            if (!empty($field->validations)) {
-                $rule    = "'" . $field->name . "' => '" . $field->validations . "'";
-                $rules[] = $rule;
-            }
-        }
-
-        return $rules;
-    }
-
-    public function generateCasts()
-    {
-        $casts = [];
-
-        $timestamps = TableFieldsGenerator::getTimestampFieldNames();
-
-        foreach ($this->commandData->fields as $field) {
-            if (in_array($field->name, $timestamps)) {
+            if (!$field->inIndex) {
                 continue;
             }
 
-            $rule = "'" . $field->name . "' => ";
-
-            switch ($field->fieldType) {
-                case 'integer':
-                    $rule .= "'integer'";
-                    break;
-                case 'double':
-                    $rule .= "'double'";
-                    break;
-                case 'float':
-                    $rule .= "'float'";
-                    break;
-                case 'boolean':
-                    $rule .= "'boolean'";
-                    break;
-                case 'dateTime':
-                case 'dateTimeTz':
-                    $rule .= "'datetime'";
-                    break;
-                case 'date':
-                    $rule .= "'date'";
-                    break;
-                case 'enum':
-                case 'string':
-                case 'char':
-                case 'text':
-                    $rule .= "'string'";
-                    break;
-                default:
-                    $rule = '';
-                    break;
-            }
-
-            if (!empty($rule)) {
-                $casts[] = $rule;
-            }
+            $tableBodyFields[] = fill_template_with_field_data(
+                $this->commandData->dynamicVars,
+                $this->commandData->fieldNamesMapping,
+                $cellFieldTemplate,
+                $field
+            );
         }
 
-        return $casts;
+        $tableBodyFields = implode(infy_nl_tab(1, 3), $tableBodyFields);
+
+        return str_replace('$FIELD_BODY$', $tableBodyFields, $templateData);
     }
 
-    private function generateRelations()
+    private function generateTableHeaderFields()
     {
-        $relations = [];
+        $headerFieldTemplate = get_template('scaffold.views.table_header', $this->templateType);
 
-        foreach ($this->commandData->relations as $relation) {
-            $relationText = $relation->getRelationFunctionText();
+        $headerFields = [];
 
-            if (!empty($relationText)) {
-                $relations[] = $relationText;
+        foreach ($this->commandData->fields as $field) {
+            if (!$field->inIndex) {
+                continue;
+            }
+            $headerFields[] = $fieldTemplate = fill_template_with_field_data(
+                $this->commandData->dynamicVars,
+                $this->commandData->fieldNamesMapping,
+                $headerFieldTemplate,
+                $field
+            );
+        }
+
+        return implode(infy_nl_tab(1, 2), $headerFields);
+    }
+
+    private function generateIndex()
+    {
+        $templateData = get_template('scaffold.views.index', $this->templateType);
+
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
+
+        if ($this->commandData->getOption('datatables')) {
+            $templateData = str_replace('$PAGINATE$', '', $templateData);
+        } else {
+            $paginate = $this->commandData->getOption('paginate');
+
+            if ($paginate) {
+                $paginateTemplate = get_template('scaffold.views.paginate', $this->templateType);
+
+                $paginateTemplate = fill_template($this->commandData->dynamicVars, $paginateTemplate);
+
+                $templateData = str_replace('$PAGINATE$', $paginateTemplate, $templateData);
+            } else {
+                $templateData = str_replace('$PAGINATE$', '', $templateData);
             }
         }
 
-        return $relations;
+        FileUtil::createFile($this->path, 'index.blade.php', $templateData);
+
+        $this->commandData->commandInfo('index.blade.php created');
+    }
+
+    private function generateFields()
+    {
+        $this->htmlFields = [];
+
+        foreach ($this->commandData->fields as $field) {
+            if (!$field->inForm) {
+                continue;
+            }
+
+            // Exata:Captura o templete setado no arquivo stub do field
+            $fieldTemplate = HTMLFieldGenerator::generateHTML($field, $this->templateType);
+
+            //Exata Sistemas: Cópia das variaveis padrões
+            $arrayVarConfig = $this->commandData->dynamicVars;
+
+            /**
+             * Exata Sistemas : Verifico se o arquivo json está definindo qual classe
+             * que o campo atual vai utilizar.Se ele estiver preenchido eu descarto a
+             * classe padrão
+             */
+            if ($field->fieldClass) {
+                //Descarta a linha relacionada ao campo padrão
+                unset($arrayVarConfig['$FIELD_CLASS$']);
+            }
+
+            //Exata Sistemas : primeiro parâmetro era $this->commandData->dynamicVars;
+            //foi alterado para $arrayVarConfig
+            if (!empty($fieldTemplate)) {
+                $fieldTemplate = fill_template_with_field_data(
+                    $arrayVarConfig,
+                    $this->commandData->fieldNamesMapping,
+                    $fieldTemplate,
+                    $field
+                );
+                //Exata:Retorna o campo já preenchido com as propriedades da coluna da tabela
+                //e adiciona no array
+                $this->htmlFields[] = $fieldTemplate;
+            }
+        }
+        //Exata: Pega o template stub do arquivo fields.stub
+        $templateData = get_template('scaffold.views.fields', $this->templateType);
+
+        //Exata: substitui as variaveis do stub pelos dados do formuláro
+        //Ex rota e botão
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
+
+        //Exata: Substitui a variavel $FIELDS$ pelos campos capturados
+        //e junta com ação do formulário
+        $templateData = str_replace('$FIELDS$', implode("\n\n", $this->htmlFields), $templateData);
+
+        //Cria o arquivo do formulário
+        FileUtil::createFile($this->path, 'fields.blade.php', $templateData);
+        $this->commandData->commandInfo('field.blade.php created');
+    }
+
+    private function generateCreate()
+    {
+        $templateData = get_template('scaffold.views.create', $this->templateType);
+
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
+
+        FileUtil::createFile($this->path, 'create.blade.php', $templateData);
+        $this->commandData->commandInfo('create.blade.php created');
+    }
+
+    private function generateUpdate()
+    {
+        $templateData = get_template('scaffold.views.edit', $this->templateType);
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
+        FileUtil::createFile($this->path, 'edit.blade.php', $templateData);
+        $this->commandData->commandInfo('edit.blade.php created');
+    }
+
+    private function generateShowFields()
+    {
+        $fieldTemplate = get_template('scaffold.views.show_field', $this->templateType);
+        $fieldsStr     = '';
+        foreach ($this->commandData->fields as $field) {
+            $singleFieldStr = str_replace('$FIELD_NAME_TITLE$', Str::title(str_replace('_', ' ', $field->name)),
+                $fieldTemplate);
+            $singleFieldStr = str_replace('$FIELD_NAME$', $field->name, $singleFieldStr);
+            $singleFieldStr = fill_template($this->commandData->dynamicVars, $singleFieldStr);
+
+            $fieldsStr .= $singleFieldStr . "\n\n";
+        }
+
+        FileUtil::createFile($this->path, 'show_fields.blade.php', $fieldsStr);
+        $this->commandData->commandInfo('show_fields.blade.php created');
+    }
+
+    private function generateShow()
+    {
+        $templateData = get_template('scaffold.views.show', $this->templateType);
+
+        $templateData = fill_template($this->commandData->dynamicVars, $templateData);
+
+        FileUtil::createFile($this->path, 'show.blade.php', $templateData);
+        $this->commandData->commandInfo('show.blade.php created');
     }
 
     public function rollback()
     {
-        if ($this->rollbackFile($this->path, $this->fileName)) {
-            $this->commandData->commandComment('Model file deleted: ' . $this->fileName);
+        $files = [
+            'table.blade.php',
+            'index.blade.php',
+            'fields.blade.php',
+            'create.blade.php',
+            'edit.blade.php',
+            'show.blade.php',
+            'show_fields.blade.php',
+        ];
+
+        if ($this->commandData->getAddOn('datatables')) {
+            $files[] = 'datatables_actions.blade.php';
+        }
+
+        foreach ($files as $file) {
+            if ($this->rollbackFile($this->path, $file)) {
+                $this->commandData->commandComment($file . ' file deleted');
+            }
         }
     }
 }
