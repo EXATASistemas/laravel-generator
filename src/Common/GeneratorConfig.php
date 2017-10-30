@@ -340,6 +340,12 @@ class GeneratorConfig
             config('infyom.laravel_generator.field_class', 'col-md-12')
         );
 
+        // Exata: Capturo o valor do módulo e faço a substituição.       
+        $commandData->addDynamicVariable(
+            '$MODULE_NAME$',
+            strtolower($this->options['module']) ? strtolower($this->options['module']."::") : ''        
+        );        
+
         return $commandData;
         return $commandData;
     }
@@ -419,13 +425,6 @@ class GeneratorConfig
             if ($this->addOns['modules'] == false) {
                 $commandData->commandError('Modules add-on not active.');
                 exit;
-            } else {
-                // Exata: Adicionado o modulo no array para poder substituir o valor no
-                // arquivo Stub
-                $commandData->addDynamicVariable(
-                    '$MODULE_NAME$',
-                    $this->options['module']
-                );
             }
         }
     }
