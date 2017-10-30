@@ -366,7 +366,13 @@ class GeneratorConfig
 
     public function prepareModelNames()
     {
-        $this->mPlural       = Str::plural($this->mName);
+        /**
+         * Exata Sistemas: Por padrão as rotas e views usa o plural do modelo.
+         * Para a lingua portuguesa nem sempre o plural funciona corretamente , então adicionei
+         * no laravel_generator a opção pluralize , que quando falso desativa a pluralização
+         * $this->mPlural       = Str::plural($this->mName); -->>   $this->mPlural       = $this->mName;
+         */
+        $this->mPlural       = config('infyom.laravel_generator.pluralize', false) ? Str::plural($this->mName) : $this->mName;
         $this->mCamel        = Str::camel($this->mName);
         $this->mCamelPlural  = Str::camel($this->mPlural);
         $this->mSnake        = Str::snake($this->mName);
