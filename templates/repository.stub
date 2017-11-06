@@ -4,6 +4,7 @@ namespace $NAMESPACE_REPOSITORY$;
 
 use $NAMESPACE_MODEL$\$MODEL_NAME$;
 use InfyOm\Generator\Common\BaseRepository;
+use Prettus\Repository\Events\RepositoryEntityDeleted;
 
 $DOCS$
 class $MODEL_NAME$Repository extends BaseRepository
@@ -22,4 +23,37 @@ class $MODEL_NAME$Repository extends BaseRepository
     {
         return $MODEL_NAME$::class;
     }
+
+    /**
+     * Delete a entity in repository by id
+     *
+     * @param $id
+     *
+     * @return int
+     */
+    public function delete($id)
+    {
+
+        if(!is_array($id)){
+
+            $this->applyScope();
+            $temporarySkipPresenter = $this->skipPresenter;
+            $this->skipPresenter(true);
+            $model = $this->find($id);
+            $originalModel = clone $model;
+            $this->skipPresenter($temporarySkipPresenter);
+            $this->resetModel();
+            if ($model->sql_deleted){
+                $model->sql_deleted = 'T';
+                $deleted = $model->save();
+            }else{
+                $deleted = $model->delete();
+            }
+            event(new RepositoryEntityDeleted($this, $originalModel));
+            return $deleted;
+        }else{
+            $deleted = $this->model->whereIn('sql_rowid', $id)->update(['sql_deleted'=>'T']);
+            return $deleted;
+        }
+    }     
 }
