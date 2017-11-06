@@ -76,15 +76,12 @@ class $MODEL_NAME$APIController extends AppBaseController
     $DOC_DESTROY$
     public function destroy($id)
     {
+        $ids = explode(",", $id);
+
         /** @var $MODEL_NAME$ $$MODEL_NAME_CAMEL$ */
-        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->findWithoutFail($id);
-
-        if (empty($$MODEL_NAME_CAMEL$)) {
-            return $this->sendError('$MODEL_NAME_HUMAN$ not found');
-        }
-
-        $$MODEL_NAME_CAMEL$->delete();
+        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->delete($ids);
 
         return $this->sendResponse($id, '$MODEL_NAME_HUMAN$ deleted successfully');
     }
 }
+
