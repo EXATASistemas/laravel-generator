@@ -95,7 +95,7 @@ class $MODEL_NAME$DataTable extends DataTable
         $transFields = [];
         // Percorro o array e monto outro array com a prorpriedade data e title
         foreach ($field as $key => $value) {
-            array_push($transFields, ['data' => $value, 'title' => trans(strtolower("$MODEL_NAME$") . "." . $value)]);
+            array_push($transFields, ['data' => $value, 'title' => trans("$MODULE_NAME$$TABLE_NAME$.$value")]);
         }
 
         // Retorno os campos formatados
