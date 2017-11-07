@@ -10,11 +10,18 @@ InfyOm Laravel Generator
 
 
 ## Comandos Artisan Laravel-Generator
-php artisan infyom:scaffold nome_do_modelo --primary=sql_rowid --fromTable --tableName=nome_da_tabela --module=nome_do_modulo --save
+
+**Gerar scaffold associado a um módulo **
+
+    php artisan infyom:scaffold nome_do_modelo --primary=sql_rowid --fromTable --tableName=nome_da_tabela --module=nome_do_modulo --save
+
 
 
 ## Comandos: Laravel-Modules
 
-php artisan modules:make nome_do_modulo
+**Criar módulo**
+
+    php artisan modules:make nome_do_modulo
+
 
 Documentation is located [here](http://labs.infyom.com/laravelgenerator)
