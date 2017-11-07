@@ -420,10 +420,10 @@ class GeneratorConfig
             }
         }
 
-        //exata: valida se add do modulos esta ativo.
-        if (!empty($this->options['module'])) {
-            if ($this->addOns['modules'] == false) {
-                $commandData->commandError('Modules add-on not active.');
+        //exata: se o add-on modules estiver ativado, o nome do módulo é obrigatório.
+        if ($this->addOns['modules'] == true) {
+            if (empty($this->options['module'])) {
+                $commandData->commandError('Module name required. To disable set false on the config.');
                 exit;
             }
         }
