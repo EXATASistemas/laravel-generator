@@ -56,7 +56,7 @@ class $MODEL_NAME$Controller extends AppBaseController
      */
     public function store(Create$MODEL_NAME$Request $request)
     {
-        $input = $request->all()->except('save_action');/** Exata: não enviar a ação selecionada para salvar no modelo */
+        $input = $request->except('save_action');/** Exata: não enviar a ação selecionada para salvar no modelo */
 
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->create($input);
 

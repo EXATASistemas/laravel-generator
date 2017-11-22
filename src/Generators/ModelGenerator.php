@@ -121,7 +121,7 @@ class ModelGenerator extends BaseGenerator
             '
     public function set' . ucwords(camel_case(trim($field->name))) . 'Attribute($value)
     {
-        $value ? $this->attributes["'.$field->name.'"] = $value : ';
+        $value ? $this->attributes["'.$field->name.'"] = $value : $this->attributes["'.$field->name.'"] = ';
 
             switch ($field->fieldType) {
                 case 'integer':
