@@ -25,6 +25,29 @@ class $MODEL_NAME$Repository extends BaseRepository
     }
 
     /**
+     * Retrieve first data of repository, or create new Entity
+     *
+     * @param array $attributes
+     *
+     * @return mixed
+     */
+    public function create(array $attributes)
+    {
+        // Troque o sql_rowid pelo campo código da entidade gerada
+        // Insiro o valor do campo sql_rowid pegando o ultimo usado + 1
+        // $sql_rowid = 1 + $this->findWhere([['sql_rowid','>',"0"]])->max('sql_rowid');
+        // $attributes['sql_rowid'] = sql_rowid;
+        // Have to skip presenter to get a model not some data
+        $temporarySkipPresenter = $this->skipPresenter;
+        $this->skipPresenter(true);
+        $model = parent::create($attributes);
+        $this->skipPresenter($temporarySkipPresenter);
+        $model = $this->updateRelations($model, $attributes);
+        $model->save();
+        return $this->parserResult($model);
+    }
+
+    /**
      * Delete a entity in repository by id
      *
      * @param $id
@@ -55,5 +78,5 @@ class $MODEL_NAME$Repository extends BaseRepository
             $deleted = $this->model->whereIn('sql_rowid', $id)->update(['sql_deleted'=>'T']);
             return $deleted;
         }
-    }     
+    }
 }

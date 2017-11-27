@@ -41,9 +41,17 @@ class $MODEL_NAME$DataTable extends DataTable
         return $this->builder()
             ->columns($this->getColumns())
             ->minifiedAjax()
-            ->addAction(['width' => '80px'])
+            ->addAction(['width' => '80px','title'=>trans('ui.action')])
             ->parameters([
-                'dom'        => 'Bfrtip',
+                "stateSave"=> true,
+                "pagingType"=> "full_numbers",
+                "dom"=> 'Bf<t><"row"<"col-sm-12 col-md-4"l><"col-sm-3 col-md-4"i><"col-sm-6 col-md-4 pull-right text-right"p>>',
+                'order'      => [[0, 'asc']],
+                "pageLength"=> 5,
+                "lengthMenu"=> [
+                    [5, 10,15,20, 25,30,35,40,45, 50, -1],
+                    [5, 10,15,20, 25,30,35,40,45, 50, "All"]
+                ],
                 'order'      => [[0, 'asc']],
 
                 // Exata Sistemas: Abilita o design responsive e fixa para esquerda
@@ -54,6 +62,43 @@ class $MODEL_NAME$DataTable extends DataTable
                     ],
 
                 ],
+
+                // Traduz os textos do Datatables com a intercionalização do Laravel
+                "language"=> [
+                    "sEmptyTable"=> trans('ui.sEmptyTable'),
+                    "sInfo"=> trans('ui.sInfo'),
+                    "sInfoEmpty"=> trans('ui.sInfoEmpty'),
+                    "sInfoFiltered"=> trans('ui.sInfoFiltered'),
+                    "sInfoPostFix"=> trans('ui.sInfoPostFix'),
+                    "sInfoThousands"=> trans('ui.sInfoThousands'),
+                    "sLengthMenu"=> trans('ui.sLengthMenu'),
+                    "sLoadingRecords"=> trans('ui.sLoadingRecords'),
+                    "sProcessing"=> trans('ui.sProcessing'),
+                    "sZeroRecords"=> trans('ui.sZeroRecords'),
+                    "sSearch"=> trans('ui.sSearch'),
+                    "oPaginate"=> [
+                        "sNext"=> trans('ui.oPaginate.sNext'),
+                        "sPrevious"=> trans('ui.oPaginate.sPrevious'),
+                        "sFirst"=> trans('ui.oPaginate.sFirst'),
+                        "sLast"=> trans('ui.oPaginate.sLast'),
+                    ],
+                    "oAria"=> [
+                        "sSortAscending"=> trans('ui.oAria.sSortAscending'),
+                        "sSortDescending"=> trans('ui.oAria.sSortDescending'),
+                    ],
+                    "buttons"=> [
+                        "copy"=> trans('ui.copy'),
+                        "excel"=> trans('ui.excel'),
+                        "csv"=> trans('ui.csv'),
+                        "pdf"=> trans('ui.pdf'),
+                        "print"=> trans('ui.print'),
+                        "selectAll"=> "<i class='fa fa-check-square-o'>". trans('ui.selectAll'),
+                        "selectNone"=> "<i class='fa fa-square-o'>". trans('ui.selectNone'),
+                        "deleteSelected"=> trans('ui.deleteSelected'),
+                        "create"=> trans('ui.create'),
+                        "export"=> trans('ui.export'),
+                    ],
+                ],                
 
                 // Exata Sistemas:Fixa a coluna de edição a direita
                 'columnDefs' => [
