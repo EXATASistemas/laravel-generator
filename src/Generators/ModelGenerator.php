@@ -134,7 +134,7 @@ class ModelGenerator extends BaseGenerator
                     $rule .= "0";
                     break;
                 case 'boolean':
-                    $rule .= "'F'";
+                    $rule .= "'0'";// Exata:Na maioria das tabelas o boolean usado é 0 ou 1 e não F e T
                     break;
                 case 'dateTime':
                 case 'dateTimeTz':
