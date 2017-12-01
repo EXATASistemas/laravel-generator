@@ -40,6 +40,8 @@ class GeneratorConfig
     public $pathController;
     public $pathRequest;
     public $pathRoutes;
+    /**Exata:Captura o path do arquivo start que registra as rotas*/
+    public $pathRegisterRoutes;
     public $pathViews;
     public $modelJsPath;
 
@@ -219,6 +221,9 @@ class GeneratorConfig
 
         $this->pathRoutes = config('infyom.laravel_generator.path.routes', app_path('Http/routes.php'));
 
+        /**Exata:Captura o path do arquivo start que registra as rotas*/
+        $this->pathRegisterRoutes = config('infyom.laravel_generator.path.registerRoutes', app_path('start.php'));        
+
         $this->pathViews = config(
             'infyom.laravel_generator.path.views',
             base_path('resources/views/')
@@ -250,6 +255,8 @@ class GeneratorConfig
         $this->pathController    = str_replace(base_path(), $modulePath, $this->pathController);
         $this->pathRequest       = str_replace(base_path(), $modulePath, $this->pathRequest);
         $this->pathRoutes        = str_replace(base_path(), $modulePath, $this->pathRoutes);
+        /**Exata:Captura o path do arquivo start que registra as rotas*/
+        $this->pathRegisterRoutes = str_replace(base_path(), $modulePath, $this->pathRegisterRoutes);        
         $this->pathViews         = str_replace(base_path(), $modulePath, $this->pathViews);
         $this->modelJsPath       = str_replace(base_path(), $modulePath, $this->modelJsPath);
     }
@@ -340,13 +347,29 @@ class GeneratorConfig
             config('infyom.laravel_generator.field_class', 'col-md-12')
         );
 
-        // Exata: Capturo o valor do módulo e faço a substituição.       
+        // Exata: Capturo o valor do módulo e faço a substituição.
         $commandData->addDynamicVariable(
             '$MODULE_NAME$',
             strtolower($this->options['module']) ? strtolower($this->options['module']."::") : ''        
-        );        
+        );
 
-        return $commandData;
+        /**
+         * Exata: Capturo o valor do módulo e faço a substituição sem formatação
+         */
+        $commandData->addDynamicVariable(
+            '$MODULE_NAME_ROUTE$',
+            strtolower($this->options['module']) ? strtolower($this->options['module']) : ''
+        );
+        
+        /**
+         * Exata: Verifico se o modulo é o mesmo nome da tabela , se for a rota só usa prefix senão usa o prefixo e mais o nome do modelo
+         */
+        $commandData->addDynamicVariable(
+            '$MODEL_NAME_ROUTE$',
+            (strtolower($this->options['tableName']) != strtolower($this->options['module'])) ?
+            '/'.strtolower($this->mPlural).'/' : '/'
+        );
+
         return $commandData;
     }
 

@@ -1,0 +1,24 @@
+<?php
+
+/*
+| ------------------------------------------------- -------------------------
+| Registro de Namespaces e Routes
+| ------------------------------------------------- -------------------------
+|
+| Quando um módulo inicia, este arquivo será executado automaticamente. Isso ajuda
+| a registrar alguns namespaces como tradutor ou visualização. Também este arquivo
+| irá carregar o arquivo de rotas para cada módulo. Você também pode modificar
+| este arquivo como você deseja.
+|
+| Registra todos os arquivos de rota que estão dentro da pasta /routes/
+*/
+
+if (!app()->routesAreCached()) {
+    $dir = __DIR__ . '/routes/';
+    foreach (scandir($dir) as $filename) {
+        $path = $dir . '/'  . $filename;
+        if (is_file($path)) {
+            require $path;
+        }
+    }
+}

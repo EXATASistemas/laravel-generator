@@ -23,6 +23,9 @@ return [
 
         'api_routes'      => base_path('routes/api.php'),
 
+        //Exata Sistemas:Arquivo do Laravel Modules que registra as rotas
+        'registerRoutes'  => base_path('start.php'),
+
         'request'         => app_path('Http/Requests/'),
 
         'api_request'     => app_path('Http/Requests/API/'),

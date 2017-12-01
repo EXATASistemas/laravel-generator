@@ -1,1 +1,9 @@
-Route::resource('$MODEL_NAME_PLURAL_CAMEL$', '$PATH_PREFIX$$MODEL_NAME$Controller');
+Route::group(['middleware' => ['web','auth'], 'prefix' => '$MODULE_NAME_ROUTE$', 'namespace' => '$NAMESPACE_CONTROLLER$'], function () {
+    Route::get('$MODEL_NAME_ROUTE$', '$PATH_PREFIX$$MODEL_NAME$Controller@index')->name('$MODEL_NAME_PLURAL_CAMEL$.index');
+    Route::get('$MODEL_NAME_ROUTE$create', '$PATH_PREFIX$$MODEL_NAME$Controller@create')->name('$MODEL_NAME_PLURAL_CAMEL$.create');
+    Route::post('$MODEL_NAME_ROUTE$', '$PATH_PREFIX$$MODEL_NAME$Controller@store')->name('cliente.store');
+    Route::get('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}', '$PATH_PREFIX$$MODEL_NAME$Controller@show')->name('cliente.show');
+    Route::get('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}/edit', '$PATH_PREFIX$$MODEL_NAME$Controller@edit')->name('cliente.edit');
+    Route::patch('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}/edit', '$PATH_PREFIX$$MODEL_NAME$Controller@update')->name('$MODEL_NAME_PLURAL_CAMEL$.update');
+    Route::delete('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}', '$PATH_PREFIX$$MODEL_NAME$Controller@destroy')->name('$MODEL_NAME_PLURAL_CAMEL$.destroy');
+});

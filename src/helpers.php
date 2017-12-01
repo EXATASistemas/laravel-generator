@@ -208,3 +208,27 @@ if (!function_exists('model_name_from_table_name')) {
         return ucfirst(camel_case(str_singular($tableName)));
     }
 }
+
+if (!function_exists('get_content_create')) {
+    /**
+     * Get content from path , if not exist create
+     *
+     * Exata: Função que pega o conteúdo de um arquivo e se ele não existir
+     * ele cria um arquivo vazio ou o conteúdo passado pelo segundo parâmetro
+     *
+     * @param string $path Caminho do arquivo
+     * @param string $defaultValue valor padrão para quando o arquivo não existir
+     * @return void
+     */
+    function get_content_create($path, $defaultValue = '')
+    {
+        if (!file_exists($path)) {
+            $dir = dirname($path);
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            file_put_contents($path, "<?php \n");
+        }
+        return file_get_contents($path);
+    }
+}
