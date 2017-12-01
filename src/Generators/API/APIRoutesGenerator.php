@@ -45,7 +45,7 @@ class APIRoutesGenerator extends BaseGenerator
         $this->pathRegister = $commandData->config->pathRegisterRoutes;
         $this->registerRoutesTemplate = get_template('routes.start', 'laravel-generator');
         $this->registerRouteContents = get_content_create($this->pathRegister);
-        if ($this->registerRouteContents != $this->registerRoutesTemplate) {
+        if (strpos($this->registerRouteContents, 'require $path;') === false) {
             file_put_contents($this->pathRegister, $this->registerRoutesTemplate);
         }
 

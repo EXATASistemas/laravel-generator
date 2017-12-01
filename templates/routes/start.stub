@@ -13,6 +13,10 @@
 | Registra todos os arquivos de rota que estão dentro da pasta /routes/
 */
 
+/**
+ * Exata: Não edite este trecho , senão todas alterações feitas neste arquivo serão perdidas
+ * ao gerar uma nova rota
+ */
 if (!app()->routesAreCached()) {
     $dir = __DIR__ . '/routes/';
     foreach (scandir($dir) as $filename) {
@@ -22,3 +26,4 @@ if (!app()->routesAreCached()) {
         }
     }
 }
+/**Exata: Edição liberada apartir deste ponto se precisar */
