@@ -41,6 +41,8 @@ return [
         'api_test'        => base_path('tests/'),
 
         'views'           => base_path('resources/views/'),
+        
+        'localization'    => base_path('resources/lang/'),
 
         'schema_files'    => base_path('resources/model_schemas/'),
 
@@ -150,6 +152,29 @@ return [
         'view'   => '', // using backend will create return view('backend.?.index') type the backend views directory
 
         'public' => '',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Localization
+    |--------------------------------------------------------------------------
+    |
+     */
+
+    'localization'        => true,
+
+    'languages'           => [
+        'pt',
+        'en',
+        'es',
+    ],
+
+    'ignore_fields'       => [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'id',
+        'sql_rowid',
     ],
 
     /*

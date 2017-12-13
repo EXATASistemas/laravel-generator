@@ -10,6 +10,7 @@ use InfyOm\Generator\Commands\API\TestsGeneratorCommand;
 use InfyOm\Generator\Commands\APIScaffoldGeneratorCommand;
 use InfyOm\Generator\Commands\Common\MigrationGeneratorCommand;
 use InfyOm\Generator\Commands\Common\ModelGeneratorCommand;
+use InfyOm\Generator\Commands\Common\LocalizationGeneratorCommand; //Exata: Comando para gerar arquivos de idiomas.
 use InfyOm\Generator\Commands\Common\RepositoryGeneratorCommand;
 use InfyOm\Generator\Commands\Publish\GeneratorPublishCommand;
 use InfyOm\Generator\Commands\Publish\LayoutPublishCommand;
@@ -77,6 +78,11 @@ class InfyOmGeneratorServiceProvider extends ServiceProvider
             return new ModelGeneratorCommand();
         });
 
+        //Exata: Registra comando.
+        $this->app->singleton('infyom.localization', function ($app) {
+            return new LocalizationGeneratorCommand();
+        });
+
         $this->app->singleton('infyom.repository', function ($app) {
             return new RepositoryGeneratorCommand();
         });
@@ -125,6 +131,7 @@ class InfyOmGeneratorServiceProvider extends ServiceProvider
             'infyom.publish.templates',
             'infyom.migration',
             'infyom.model',
+            'infyom.localization',
             'infyom.repository',
             'infyom.api.controller',
             'infyom.api.requests',

@@ -63,7 +63,7 @@ class CommandData
         $this->fieldNamesMapping = [
             '$FIELD_NAME_TITLE$' => 'fieldTitle',
             '$FIELD_NAME$'       => 'name',
-            '$FIELD_CLASS$'       => 'fieldClass',
+            '$FIELD_CLASS$'      => 'fieldClass',
 
         ];
 

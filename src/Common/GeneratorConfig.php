@@ -29,19 +29,17 @@ class GeneratorConfig
     /* Path variables */
     public $pathRepository;
     public $pathModel;
+    public $pathLocalization; //Exata: Caminho da pasta 'lang'
     public $pathDataTables;
-
     public $pathApiController;
     public $pathApiRequest;
     public $pathApiRoutes;
     public $pathApiTests;
     public $pathApiTestTraits;
-
     public $pathController;
     public $pathRequest;
     public $pathRoutes;
-    /**Exata:Captura o path do arquivo start que registra as rotas*/
-    public $pathRegisterRoutes;
+    public $pathRegisterRoutes; //Exata: Caminho do arquivo start que registra as rotas
     public $pathViews;
     public $modelJsPath;
 
@@ -189,6 +187,7 @@ class GeneratorConfig
         ) . $prefix;
 
         $this->pathModel = config('infyom.laravel_generator.path.model', app_path('Models/')) . $prefix;
+        $this->pathLocalization = config('infyom.laravel_generator.path.localization', app_path('resources/lang/'));
 
         if (config('infyom.laravel_generator.ignore_model_prefix', false)) {
             $this->pathModel = config('infyom.laravel_generator.path.model', app_path('Models/'));
@@ -246,6 +245,7 @@ class GeneratorConfig
 
         $this->pathRepository    = str_replace(base_path(), $modulePath, $this->pathRepository);
         $this->pathModel         = str_replace(base_path(), $modulePath, $this->pathModel);
+        $this->pathLocalization  = str_replace(base_path(), $modulePath, $this->pathLocalization);
         $this->pathDataTables    = str_replace(base_path(), $modulePath, $this->pathDataTables);
         $this->pathApiController = str_replace(base_path(), $modulePath, $this->pathApiController);
         $this->pathApiRequest    = str_replace(base_path(), $modulePath, $this->pathApiRequest);

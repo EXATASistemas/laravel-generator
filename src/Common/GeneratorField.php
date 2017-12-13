@@ -21,6 +21,7 @@ class GeneratorField
     public $migrationText;
     public $foreignKeyText;
     public $validations;
+    public $localizationText; //Exata: Texto das linhas no arquivo de insternacionalização.
 
     /** @var bool */
     public $isSearchable = true;
@@ -33,6 +34,7 @@ class GeneratorField
     {
         $this->dbInput = $dbInput;
         $this->prepareMigrationText();
+        $this->prepareLocalizationText();
     }
 
     public function parseHtmlInput($htmlInput)
@@ -125,6 +127,11 @@ class GeneratorField
         $this->migrationText .= ';';
     }
 
+    private function prepareLocalizationText()
+    {
+        $this->localizationText = "'".$this->name."' => '',";
+    }
+    
     /**
      * Exata
      * parseFieldFromFile Recurera as informações dos campos atraves do arquivo json

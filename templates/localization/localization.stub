@@ -1,0 +1,10 @@
+<?php
+
+/*
+ * Tabela: $TABLE_NAME$
+ * Descrição: 
+ */
+
+return [
+$LANG_KEYS$
+];

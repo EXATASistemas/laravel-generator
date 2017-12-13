@@ -39,5 +39,5 @@ $PRIMARY$
     /**
      * Exata Sistemas: Usado para gerar os mutators para inicializar a variavel quando nulo.
      */
-    $MUTATORS$    
+    $MUTATORS$
 }
