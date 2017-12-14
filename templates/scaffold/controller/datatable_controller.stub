@@ -44,7 +44,7 @@ class $MODEL_NAME$Controller extends AppBaseController
     public function create()
     {
         $this->data['saveAction'] = $this->getSaveAction();/** Exata: Captura a ultima ação usada e joga para o formulário para já estar selecionado */
-        return view('$MODULE_NAME$$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.create')->with('saveAction',$this->data['saveAction']);        
+        return view('$MODULE_NAME$$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.create')->with('saveAction', $this->data['saveAction']);
     }
 
     /**
@@ -145,6 +145,12 @@ class $MODEL_NAME$Controller extends AppBaseController
      */
     public function destroy($id)
     {
+        /**
+         * $id campo chave , transformo em array apara poder
+         * excluir mais de um de cada vez
+         * @var [type]
+         */
+        $id = explode(",", $id);
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->findWithoutFail($id);
 
         if (empty($$MODEL_NAME_CAMEL$)) {

@@ -46,9 +46,9 @@ class $MODEL_NAME$Controller extends AppBaseController
      * @return Response
      */
     public function create()
-    {        
+    {
         $this->data['saveAction'] = $this->getSaveAction();/** Exata: Captura a ultima ação usada e joga para o formulário para já estar selecionado */
-        return view('$MODULE_NAME$$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.create')->with('saveAction',$this->data['saveAction']);        
+        return view('$MODULE_NAME$$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.create')->with('saveAction', $this->data['saveAction']);
     }
 
     /**
@@ -65,7 +65,7 @@ class $MODEL_NAME$Controller extends AppBaseController
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->create($input);
 
         Flash::success(trans('$MODULE_NAME$$TABLE_NAME$.criado'))->important();
-        
+
         $this->setSaveAction();/** Exata: Salva na sessão a ultima ação */
 
         return redirect($this->performSaveAction($$MODEL_NAME_CAMEL$));/** Exata: Executa o redirecionamento para o local selecionado */
@@ -107,7 +107,7 @@ class $MODEL_NAME$Controller extends AppBaseController
 
             return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
         }
-        
+
         $this->data['saveAction'] = $this->getSaveAction();/** Exata: Captura a ultima ação usada e joga para o formulário para já estar selecionado */
 
         return view('$MODULE_NAME$$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.edit')->with(['$MODEL_NAME_CAMEL$'=> $$MODEL_NAME_CAMEL$,'saveAction'=> $this->data['saveAction']]);
@@ -134,7 +134,7 @@ class $MODEL_NAME$Controller extends AppBaseController
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->update($request->except('save_action'), $id);/** Exata: não enviar a ação selecionada para salvar no modelo */
 
         Flash::success(trans('$MODULE_NAME$$TABLE_NAME$.editado'))->important();
-        
+
         $this->setSaveAction();/** Exata: Salva na sessão a ultima ação */
 
         return redirect($this->performSaveAction($$MODEL_NAME_CAMEL$));/** Exata: Executa o redirecionamento para o local selecionado */
@@ -149,6 +149,12 @@ class $MODEL_NAME$Controller extends AppBaseController
      */
     public function destroy($id)
     {
+        /**
+         * $id campo chave , transformo em array apara poder
+         * excluir mais de um de cada vez
+         * @var [type]
+         */
+        $id = explode(",", $id);
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->findWithoutFail($id);
 
         if (empty($$MODEL_NAME_CAMEL$)) {
