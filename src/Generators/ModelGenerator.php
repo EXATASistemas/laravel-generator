@@ -99,7 +99,7 @@ class ModelGenerator extends BaseGenerator
          * Adriano 22/10/2017
          */
         if (stripos($templateData, '$MUTATORS$') !== false) {
-            $templateData = str_replace('$MUTATORS$', implode(' ' . infy_nl_tab(1, 2), $this->generateMutators()), $templateData);
+            $templateData = str_replace('$MUTATORS$', implode('' . infy_nl_tab(1, 2), $this->generateMutators()), $templateData);
         }
 
         return $templateData;
@@ -160,8 +160,7 @@ class ModelGenerator extends BaseGenerator
                 if ($field->name == 'sql_deleted') {
                     $rule = str_replace("''", "'F'", $rule);
                 }
-                $rule .=
-                    ";
+                $rule .=";
     }";
                 $mutators[] = $rule;
             }
