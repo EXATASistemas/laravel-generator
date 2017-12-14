@@ -191,6 +191,12 @@ class TableFieldsGenerator
             $field->dbInput .= ',true';
         }
 
+        if ($column->getNotnull()) {//Exata:Adiciona na validação quando campo não aceita nulo e não é chave é
+            if ($field->name != $this->primaryKey) {
+                $field->validations = 'required';
+            }
+        }
+
         return $this->checkForPrimary($field);
     }
 
@@ -229,6 +235,12 @@ class TableFieldsGenerator
         $field->name = $column->getName();
         $field->parseDBType($dbType);
         $field->parseHtmlInput($htmlType);
+
+        if ($column->getNotnull()) {//Exata:Adiciona na validação quando campo não aceita nulo e não é chave é
+            if ($field->name != $this->primaryKey) {
+                $field->validations = 'required';
+            }
+        }
 
         return $this->checkForPrimary($field);
     }
