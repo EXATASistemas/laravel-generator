@@ -1,6 +1,7 @@
 <?php
 
 namespace $NAMESPACE_DATATABLES$;
+
 use $NAMESPACE_MODEL$\$MODEL_NAME$;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Services\DataTable;
@@ -98,7 +99,7 @@ class $MODEL_NAME$DataTable extends DataTable
                         "create"=> trans('ui.create'),
                         "export"=> trans('ui.export'),
                     ],
-                ],                
+                ],
 
                 // Exata Sistemas:Fixa a coluna de edição a direita
                 'columnDefs' => [
@@ -113,15 +114,12 @@ class $MODEL_NAME$DataTable extends DataTable
                 'buttons'    => [
                     'selectAll',
                     'selectNone',
-                    //'selectRows',
-                    //'selectColumns',
-                    'create',
                     'export',
                     'print',
                     'reset',
                     'reload',
-                    'deleteSelected',//Arquivo externo public/js/script.js
-
+                    'deleteSelected',
+                    'create',
                 ],
                 'select'     => true,
             ]);
