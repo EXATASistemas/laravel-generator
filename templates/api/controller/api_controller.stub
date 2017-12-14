@@ -84,4 +84,3 @@ class $MODEL_NAME$APIController extends AppBaseController
         return $this->sendResponse($id, '$MODEL_NAME_HUMAN$ deleted successfully');
     }
 }
-
