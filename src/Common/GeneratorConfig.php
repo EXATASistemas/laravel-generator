@@ -259,6 +259,8 @@ class GeneratorConfig
         $this->pathRegisterRoutes = str_replace(base_path(), $modulePath, $this->pathRegisterRoutes);
         $this->pathViews         = str_replace(base_path(), $modulePath, $this->pathViews);
         $this->modelJsPath       = str_replace(base_path(), $modulePath, $this->modelJsPath);
+        echo($this->pathModel);
+        exit;
     }
 
     public function loadDynamicVariables(CommandData &$commandData)

@@ -37,7 +37,7 @@ class MigrationGenerator extends BaseGenerator
         FileUtil::createFile($this->path, $fileName, $templateData);
 
         $this->commandData->commandComment("\nMigration created: ");
-        $this->commandData->commandInfo($fileName);
+        $this->commandData->commandInfo($this->path.'/'.$fileName);
     }
 
     private function generateFields()

@@ -50,7 +50,7 @@ class ModelGenerator extends BaseGenerator
         FileUtil::createFile($this->path, $this->fileName, $templateData);
 
         $this->commandData->commandComment("\nModel created: ");
-        $this->commandData->commandInfo($this->fileName);
+        $this->commandData->commandInfo($this->path.'/'.$this->fileName);
 
     }
 

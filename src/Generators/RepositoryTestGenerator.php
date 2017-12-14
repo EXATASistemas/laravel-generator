@@ -32,7 +32,7 @@ class RepositoryTestGenerator extends BaseGenerator
         FileUtil::createFile($this->path, $this->fileName, $templateData);
 
         $this->commandData->commandObj->comment("\nRepositoryTest created: ");
-        $this->commandData->commandObj->info($this->fileName);
+        $this->commandData->commandObj->info($this->path.'/'.$this->fileName);
     }
 
     private function fillTemplate($templateData)

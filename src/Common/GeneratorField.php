@@ -129,7 +129,7 @@ class GeneratorField
 
     private function prepareLocalizationText()
     {
-        $this->localizationText = "'".$this->name."' => '',";
+        $this->localizationText = "'".$this->name."' => '".$this->name."',";
     }
     
     /**

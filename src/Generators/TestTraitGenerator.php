@@ -33,7 +33,7 @@ class TestTraitGenerator extends BaseGenerator
         FileUtil::createFile($this->path, $this->fileName, $templateData);
 
         $this->commandData->commandObj->comment("\nTestTrait created: ");
-        $this->commandData->commandObj->info($this->fileName);
+        $this->commandData->commandObj->info($this->path.'/'.$this->fileName);
     }
 
     private function fillTemplate($templateData)

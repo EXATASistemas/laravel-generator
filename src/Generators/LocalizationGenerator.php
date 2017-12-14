@@ -6,6 +6,7 @@ use InfyOm\Generator\Common\CommandData;
 use InfyOm\Generator\Common\GeneratorFieldRelation;
 use InfyOm\Generator\Utils\FileUtil;
 use InfyOm\Generator\Utils\TableFieldsGenerator;
+use Modules\Config\Repositories;
 
 class LocalizationGenerator extends BaseGenerator
 {
@@ -22,7 +23,6 @@ class LocalizationGenerator extends BaseGenerator
     /** @var string */
     private $path;
     private $fileName;
-    private $table;
 
     /**
      * ModelGenerator constructor.
@@ -34,8 +34,7 @@ class LocalizationGenerator extends BaseGenerator
         $this->commandData = $commandData;
         $this->excluded    = config('infyom.laravel_generator.ignore_fields');
         $this->path        = $commandData->config->pathLocalization;
-        $this->fileName    = $this->commandData->modelName . '.php';
-        $this->table       = $this->commandData->dynamicVars['$TABLE_NAME$'];
+        $this->fileName    = $this->commandData->dynamicVars['$TABLE_NAME$'] . '.php';
     }
 
     public function generate()
@@ -77,8 +76,19 @@ class LocalizationGenerator extends BaseGenerator
         return $langKeys;
     }
 
-    public function fillDatabase() {
-        //
+    public function setLocalizationDb()
+    {
+        foreach ($this->commandData->fields as $field) {
+            LanguageLineRepository::create([
+                'modules_id'=> '',
+                'group' => $this->fileName,
+                'key' => $field->name,
+                'text' => [
+                    'en' => 'This is a required field',
+                    'nl' => 'Dit is een verplicht veld'
+                ],
+            ]);
+        }
     }
 
     public function rollback()

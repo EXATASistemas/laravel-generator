@@ -13,11 +13,11 @@ return [
 
         'migration'       => base_path('database/migrations/'),
 
-        'model'           => app_path('Models/'),
+        'model'           => base_path('Models/'),
 
-        'datatables'      => app_path('DataTables/'),
+        'datatables'      => base_path('DataTables/'),
 
-        'repository'      => app_path('Repositories/'),
+        'repository'      => base_path('Repositories/'),
 
         'routes'          => base_path('routes/web.php'),
 
@@ -26,13 +26,13 @@ return [
         //Exata Sistemas:Arquivo do Laravel Modules que registra as rotas
         'registerRoutes'  => base_path('start.php'),
 
-        'request'         => app_path('Http/Requests/'),
+        'request'         => base_path('Http/Requests/'),
 
-        'api_request'     => app_path('Http/Requests/API/'),
+        'api_request'     => base_path('Http/Requests/API/'),
 
-        'controller'      => app_path('Http/Controllers/'),
+        'controller'      => base_path('Http/Controllers/'),
 
-        'api_controller'  => app_path('Http/Controllers/API/'),
+        'api_controller'  => base_path('Http/Controllers/API/'),
 
         'test_trait'      => base_path('tests/traits/'),
 

@@ -48,7 +48,7 @@ class RepositoryGenerator extends BaseGenerator
         FileUtil::createFile($this->path, $this->fileName, $templateData);
 
         $this->commandData->commandComment("\nRepository created: ");
-        $this->commandData->commandInfo($this->fileName);
+        $this->commandData->commandInfo($this->path.'/'.$this->fileName);
     }
 
     public function rollback()
