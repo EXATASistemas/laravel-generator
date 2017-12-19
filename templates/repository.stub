@@ -75,7 +75,7 @@ class $MODEL_NAME$Repository extends BaseRepository
             event(new RepositoryEntityDeleted($this, $originalModel));
             return $deleted;
         }else{            
-            if ($this->model->sql_deleted) {
+            if ($this->model->getKeyName() == 'sql_rowid' ) {
                 $deleted = $this->model->whereIn('sql_rowid', $id)->update(['sql_deleted'=>'T']);
             } else {
                 $deleted = $this->model->whereIn('id', $id)->delete();
