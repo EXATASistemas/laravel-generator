@@ -1,9 +1,9 @@
 Route::group(['middleware' => 'api', 'prefix' => '$MODULE_NAME_ROUTE$/api', 'namespace' => '$NAMESPACE_CONTROLLER$\API'], function () {
     Route::get('$MODEL_NAME_ROUTE$', '$PATH_PREFIX$$MODEL_NAME$APIController@index')->name('$MODEL_NAME_PLURAL_CAMEL$.index_api');
     Route::get('$MODEL_NAME_ROUTE$create', '$PATH_PREFIX$$MODEL_NAME$APIController@create')->name('$MODEL_NAME_PLURAL_CAMEL$.create_api');
-    Route::post('$MODEL_NAME_ROUTE$', '$PATH_PREFIX$$MODEL_NAME$APIController@store')->name('cliente.storedestroy_api');
-    Route::get('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}', '$PATH_PREFIX$$MODEL_NAME$APIController@show')->name('cliente.showdestroy_api');
-    Route::get('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}/edit', '$PATH_PREFIX$$MODEL_NAME$APIController@edit')->name('cliente.editdestroy_api');
+    Route::post('$MODEL_NAME_ROUTE$', '$PATH_PREFIX$$MODEL_NAME$APIController@store')->name('$MODEL_NAME_PLURAL_CAMEL$.storedestroy_api');
+    Route::get('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}', '$PATH_PREFIX$$MODEL_NAME$APIController@show')->name('$MODEL_NAME_PLURAL_CAMEL$.showdestroy_api');
+    Route::get('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}/edit', '$PATH_PREFIX$$MODEL_NAME$APIController@edit')->name('$MODEL_NAME_PLURAL_CAMEL$.editdestroy_api');
     Route::patch('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}/edit', '$PATH_PREFIX$$MODEL_NAME$APIController@update')->name('$MODEL_NAME_PLURAL_CAMEL$.updatedestroy_api');
     Route::delete('$MODEL_NAME_ROUTE${$MODEL_NAME_PLURAL_CAMEL$}', '$PATH_PREFIX$$MODEL_NAME$APIController@destroy')->name('$MODEL_NAME_PLURAL_CAMEL$.destroy_api');
 });
